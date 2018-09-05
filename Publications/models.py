@@ -1,41 +1,91 @@
 from django.db import models
 
-class User (models.Model):
-    name = models.CharField(max_length=50)
-    login = models.CharField(max_length=30)
-    password = models.CharField(max_length=20)
-    user_group = models.ForeignKey(Group) # Как устранить эту ошибку? unresolved reference
+
+class Base_User (models.Model):
+    class Meta:
+        abstract = True
+        username = models.CharField(max_length=50)
+        password = models.CharField(max_length=50)
+        email = models.CharField(max_length=50)
+        first_name = models.CharField(max_length=50)
+        second_name = models.CharField(max_length=50)
+
+class Base_Publication (models.Model):
+    class Meta:
+        abstract = True
+        author = models.ForeignKey(Base_User)  # Как добавить ссылку на поле  name?
+        body = models.TextField()
+        pub_date = models.DateTimeField()
+
+# Этот класс вроде и не нужен
+# class User (Base_User):
+        # user_group = models.ForeignKey(Group) # Как устранить эту ошибку? unresolved reference
+
 
 class Group (models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(Base_User)
     user_group = models.CharField(max_length=50)
 
+
 class UserBrowserDetails (models.Model):
-    name = models.ForeignKey(User) # Как добавить ссылку на поле  name?
-    IP = models.CharField(max_length=50)
-    MAC = models.CharField(max_length=50)
+    name = models.ForeignKey(Base_User) # Как добавить ссылку на поле  name?
+    ip = models.CharField(max_length=50)
+    mac = models.CharField(max_length=50)
     browser_type = models.CharField(max_length=50)
 
-class Rating (models.Model):
-    publication_rating = models.CharField() # Не знаю что выбрать для рейтинга
-    publication_details = models.ForeignKey(Publication)
-    users_rating = models.CharField()
-    user_details = models.ForeignKey(User)
 
-# Автор, заголовок, текст, жанр, время и дата создания
-class Publication (models.Model):
-    author = models.ForeignKey(User) # Как добавить ссылку на поле  name?
+class Publication (Base_Publication):
     title = models.CharField(max_length=150)
-    body = models.TextField()
     genre = models.CharField(max_length=50)
-    pub_date = models.DateTimeField()
-    publication_rating = models.ForeignKey(Rating)
+    url_publication = models.CharField()
 
 
-class Comment (Publication):
-    comment_body = models.TextField()
+class Rating (models.Model):
+    publication_rating = models.CharField() # Не знаю какой тип модели выбрать для рейтинга
+    publication_details = models.ForeignKey(Publication)
 
-class Article (Publication):
+
+class Comment (Base_Publication):
+    link_to_publication = models.ForeignKey(Publication) # Нужно только поле URL
+
+
+class Article (Base_Publication):
+    url_original = models.CharField() # Какая-то ерунда
+
+
+class ArticleType (models.Model):
+    article = models.ForeignKey(Article)
+    article_type = models.CharField()
+
+
+class ArticleSection (models.Model):
+    article = models.ForeignKey(Article)
+    article_section = models.CharField()
+
+
+class ArticleSectionGroup (models.Model):
+    article_section = models.ForeignKey(ArticleSection)
+    article_section_group = models.CharField()
+
+
+class Image (models.Model):
+    image = models.CharField() # Не знаю какой тип
+    link_to_publication = models.ForeignKey(Publication)
+
+
+class EmbeddedObject (models.Model):
+    link_to_publication = models.ForeignKey(Publication)
+    embedded_object = models.CharField() # Не знаю какой тип
+
+
+class EmbeddedObjectType (models.Model):
+    embedded_object = models.ForeignKey(EmbeddedObject)
+    embedded_object_type = models.CharField()
+
+
+
+
+
 
 
 
